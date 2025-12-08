@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Date, Numeric, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 
@@ -14,7 +14,6 @@ class Document(Base):
     document_type_id = Column(Integer, ForeignKey("documenttypes.id"), nullable=False)
    
     company = relationship("Company", back_populates="documents")
-    
     document_type = relationship("DocumentType", back_populates="documents")
 
 class DocumentType(Base):
@@ -24,7 +23,6 @@ class DocumentType(Base):
     name = Column(String(45), nullable=False)
 
     documents = relationship("Document", back_populates="document_type")
-
 
 class Company(Base):
     __tablename__ = "companies"
@@ -45,3 +43,34 @@ class CompanyType(Base):
     name = Column(String(45), nullable=False)
 
     companies = relationship("Company", back_populates="company_type")
+
+class Product(Base):
+    __tablename__ = "products"
+
+    id = Column(Integer, primary_key=True, index=True)
+    article = Column(Integer, nullable=False)
+    name = Column(String(45), nullable=False)
+    purchase_price = Column(Numeric(20, 0))
+    sell_price = Column(Numeric(20, 0))
+
+    category_id = Column(Integer, ForeignKey("categories.id"))
+    unit_id = Column(Integer, ForeignKey("units.id"))
+    
+    category = relationship("Category", back_populates="products")
+    unit = relationship("Unit", back_populates="products")
+
+class Category(Base):
+    __tablename__ = "categories"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(45), nullable=False)
+
+    products = relationship("Product", back_populates="category")
+
+class Unit(Base):
+    __tablename__ = "units"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(45), nullable=False)
+
+    products = relationship("Product", back_populates="unit")
