@@ -73,6 +73,34 @@ class CategoryOut(BaseModel):
 class CategoryCreate(BaseModel):
     name: str
 
+#Employee
+class EmployeeOut(BaseModel):
+    id: int
+    login: str
+    password: str
+    first_name: str
+    last_name: str
+    role_id: int
+
+    class Config:
+        orm_mode = True
+
+class EmployeeCreate(BaseModel):
+    id: int
+    login: str
+    password: str
+    first_name: str
+    last_name: str
+    role_id: int
+
+class EmployeeUpdate(BaseModel):
+    id: Optional[int] = None
+    login: Optional[str] = None
+    password: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    role_id: Optional[int] = None
+
 # Unit
 class UnitOut(BaseModel):
     id: int

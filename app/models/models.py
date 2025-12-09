@@ -44,6 +44,19 @@ class CompanyType(Base):
 
     companies = relationship("Company", back_populates="company_type")
 
+class Employee(Base):
+    __tablename__ = "employees"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    login = Column(String(45), nullable=False)
+    password = Column(String(45), nullable=False)
+
+    first_name = Column(String(45), nullable=False)
+    last_name = Column(String(45), nullable=False)
+
+    role_id = Column(Integer, ForeignKey("roles.id"))
+
 class Product(Base):
     __tablename__ = "products"
 
