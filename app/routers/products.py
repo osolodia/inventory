@@ -30,6 +30,7 @@ def get_products(db: Session = Depends(get_db)):
                 name=p.name,
                 purchase_price=float(p.purchase_price) if p.purchase_price else None,
                 sell_price=float(p.sell_price) if p.sell_price else None,
+                is_active=bool(p.is_active),
                 category=p.category.name if p.category else None,
                 unit=p.unit.name if p.unit else None
             )
@@ -48,6 +49,7 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
         name=p.name,
         purchase_price=float(p.purchase_price) if p.purchase_price else None,
         sell_price=float(p.sell_price) if p.sell_price else None,
+        is_active=bool(p.is_active),
         category=p.category.name if p.category else None,
         unit=p.unit.name if p.unit else None
     )
@@ -65,6 +67,7 @@ def create_product(product: ProductCreate, db: Session = Depends(get_db)):
         name=db_product.name,
         purchase_price=float(db_product.purchase_price) if db_product.purchase_price else None,
         sell_price=float(db_product.sell_price) if db_product.sell_price else None,
+        is_active=bool(db_product.is_active),
         category=db_product.category.name if db_product.category else None,
         unit=db_product.unit.name if db_product.unit else None
     )
@@ -87,6 +90,7 @@ def update_product(product_id: int, product: ProductUpdate, db: Session = Depend
         name=db_product.name,
         purchase_price=float(db_product.purchase_price) if db_product.purchase_price else None,
         sell_price=float(db_product.sell_price) if db_product.sell_price else None,
+        is_active=bool(db_product.is_active),
         category=db_product.category.name if db_product.category else None,
         unit=db_product.unit.name if db_product.unit else None
     )

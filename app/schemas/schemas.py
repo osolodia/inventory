@@ -119,6 +119,7 @@ class ProductOut(BaseModel):
     name: str
     purchase_price: Optional[float] = None
     sell_price: Optional[float] = None
+    is_active: Optional[bool] 
     category: Optional[str] = None  
     unit: Optional[str] = None  
 
@@ -130,6 +131,7 @@ class ProductCreate(BaseModel):
     name: str
     purchase_price: Optional[float] = None
     sell_price: Optional[float] = None
+    is_active: bool = True
     category_id: Optional[int] = None
     unit_id: Optional[int] = None
 
@@ -138,5 +140,6 @@ class ProductUpdate(BaseModel):
     name: Optional[str] = None
     purchase_price: Optional[float] = None
     sell_price: Optional[float] = None
+    is_active: Optional[bool] = None
     category_id: Optional[int] = None
     unit_id: Optional[int] = None
