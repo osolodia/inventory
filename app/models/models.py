@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Numeric, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Date, Numeric, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 
@@ -52,7 +52,8 @@ class Product(Base):
     name = Column(String(45), nullable=False)
     purchase_price = Column(Numeric(20, 0))
     sell_price = Column(Numeric(20, 0))
-
+    is_active = Column(Boolean, nullable=False)
+    
     category_id = Column(Integer, ForeignKey("categories.id"))
     unit_id = Column(Integer, ForeignKey("units.id"))
     
