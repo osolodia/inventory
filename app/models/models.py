@@ -55,6 +55,15 @@ class Employee(Base):
     first_name = Column(String(45), nullable=False)
     last_name = Column(String(45), nullable=False)
 
+    passport_series = Column(Integer, nullable=False)
+    passport_number = Column(Integer, nullable=False)
+
+    email = Column(String(45), nullable=True)
+    number_phone = Column(String(45), nullable=True)
+    date_birth = Column(String(45), nullable=True)
+
+    position_id = Column(Integer, ForeignKey("positions.id"))
+    subdivision_id = Column(Integer, ForeignKey("subdivisions.id"))
     role_id = Column(Integer, ForeignKey("roles.id"))
 
 class Product(Base):

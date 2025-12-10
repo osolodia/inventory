@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from typing import List
 from app.db.database import SessionLocal
 from app.models.models import Employee
@@ -30,6 +31,13 @@ def get_employees(db: Session = Depends(get_db)):
                 password=employee.password,
                 first_name=employee.first_name,
                 last_name=employee.last_name,
+                passposrt_series = employee.passport_series,
+                passport_number = employee.passport_number,
+                email = employee.email,
+                number_phone = employee.number_phone,
+                date_birth = employee.date_birth,
+                position_id=employee.position_id,
+                subdivision_id=employee.subdivision_id,
                 role_id=employee.role_id
             )
         )
@@ -47,48 +55,68 @@ def get_employee(employee_id: int, db: Session = Depends(get_db)):
         password=employee.password,
         first_name=employee.first_name,
         last_name=employee.last_name,
+        passposrt_series = employee.passport_series,
+        passport_number = employee.passport_number,
+        email = employee.email,
+        number_phone = employee.number_phone,
+        date_birth = employee.date_birth,
+        position_id=employee.position_id,
+        subdivision_id=employee.subdivision_id,
         role_id=employee.role_id
     )
 
-@router.post("/", response_model=EmployeeOut)
+@router.post("/create")
 def create_employee(employee: EmployeeCreate, db: Session = Depends(get_db)):
-    db_employee = Employee(**employee.dict())
-    db.add(db_employee)
-    db.commit()
-    db.refresh(db_employee)
-    return EmployeeOut(
-        id=employee.id,
-        login=employee.login,
-        password=employee.password,
-        first_name=employee.first_name,
-        last_name=employee.last_name,
-        role_id=employee.role_id
-    )
-"""
-@router.put("/{company_id}", response_model=CompanyOut)
-def update_company(company_id: int, company: CompanyCreate, db: Session = Depends(get_db)):
-    db_company = db.query(Company).filter(Company.id == company_id).first()
-    if not db_company:
-        raise HTTPException(status_code=404, detail="Company not found")
+    try:
+        # Вызов хранимой процедуры
+        sql = text("""
+            CALL create_employee(
+                :login, :password, :first_name, :last_name,
+                :passport_series, :passport_number, :email, :number_phone,
+                :date_birth, :position_id, :subdivision_id, :role_id
+            )
+        """)
+        
+        result = db.execute(sql, {
+            'login': employee.login,
+            'password': employee.password,
+            'first_name': employee.first_name,
+            'last_name': employee.last_name,
+            'passport_series': employee.passport_series,
+            'passport_number': employee.passport_number,
+            'email': employee.email if employee.email else None,
+            'number_phone': employee.number_phone if employee.number_phone else None,
+            'date_birth': employee.date_birth if employee.date_birth else None,
+            'position_id': employee.position_id,
+            'subdivision_id': employee.subdivision_id,
+            'role_id': employee.role_id
+        })
+        
+        db.commit()
+        
+        # Получаем сообщение из процедуры
+        message = result.fetchone()
+        
+        return {
+            "success": True,
+            "message": message[0] if message else "Сотрудник создан успешно"
+        }
+        
+    except Exception as e:
+        db.rollback()
+        error_msg = str(e)
+        
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Полная ошибка: {error_details}")
+        
+        raise HTTPException(
+            status_code=500,
+            detail=f"Ошибка создания сотрудника: {str(e)}"
+        )
     
-    db_company.name = company.name
-    db_company.company_type_id = company.company_type_id
-    db.commit()
-    db.refresh(db_company)
-    
-    return CompanyOut(
-        id=db_company.id,
-        name=db_company.name,
-        company_type=db_company.company_type.name if db_company.company_type else None
-    )
-
-@router.delete("/{company_id}")
-def delete_company(company_id: int, db: Session = Depends(get_db)):
-    db_company = db.query(Company).filter(Company.id == company_id).first()
-    if not db_company:
-        raise HTTPException(status_code=404, detail="Company not found")
-    
-    db.delete(db_company)
-    db.commit()
-    return {"detail": "Company deleted"}
-"""
+        """# Обработка ошибок из процедуры
+        if "Сотрудник с таким логином уже существует" in error_msg:
+            raise HTTPException(status_code=400, detail=error_msg)
+        
+        raise HTTPException(status_code=500, detail=f"Ошибка создания сотрудника: {error_msg}")"""

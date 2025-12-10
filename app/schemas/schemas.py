@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import date
 from typing import Optional, List
 
 # CompanyType
@@ -75,23 +76,24 @@ class CategoryCreate(BaseModel):
 
 #Employee
 class EmployeeOut(BaseModel):
-    id: int
     login: str
     password: str
     first_name: str
     last_name: str
+    passport_series: int
+    passport_number: int
+    email: Optional[str] = None
+    number_phone: Optional[str] = None
+    date_birth: Optional[date] = None
+    position_id: int
+    subdivision_id: int
     role_id: int
 
     class Config:
         orm_mode = True
 
-class EmployeeCreate(BaseModel):
-    id: int
-    login: str
-    password: str
-    first_name: str
-    last_name: str
-    role_id: int
+class EmployeeCreate(EmployeeOut):
+    pass
 
 class EmployeeUpdate(BaseModel):
     id: Optional[int] = None
@@ -99,6 +101,13 @@ class EmployeeUpdate(BaseModel):
     password: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+    passport_series: Optional[int] = None
+    passport_number: Optional[int] = None
+    email: Optional[str] = None
+    numberPhone: Optional[str] = None
+    date_birth: Optional[str] = None
+    position_id: Optional[int] = None
+    subdivision_id: Optional[int] = None
     role_id: Optional[int] = None
 
 # Unit
