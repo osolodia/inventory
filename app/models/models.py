@@ -97,3 +97,21 @@ class Unit(Base):
     name = Column(String(45), nullable=False)
 
     products = relationship("Product", back_populates="unit")
+
+class StorageCondition(Base):
+    __tablename__ = "storageconditions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+
+    zones = relationship("StorageZone", back_populates="storage_condition")
+
+class StorageZone(Base):
+    __tablename__ = "storagezones"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    comment = Column(String)
+    storage_condition_id = Column(Integer, ForeignKey("storageconditions.id"), nullable=False)
+
+    storage_condition = relationship("StorageCondition", back_populates="zones")

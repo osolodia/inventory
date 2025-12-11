@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import products, documents, companies, companytypes, documenttypes, categories, units, employees
+from app.routers import products, documents, companies, companytypes, documenttypes, categories, units, employees,  storageconditions, storagezones
 from app.routers import auth
 
 app = FastAPI(title="Inventory API")
@@ -29,6 +29,8 @@ app.include_router(categories.router)
 app.include_router(units.router)
 app.include_router(employees.router)
 app.include_router(auth.router)
+app.include_router(storageconditions.router)
+app.include_router(storagezones.router)
 
 # Корневой эндпоинт
 @app.get("/")
