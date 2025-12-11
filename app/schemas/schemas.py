@@ -143,3 +143,31 @@ class ProductUpdate(BaseModel):
     is_active: Optional[bool] = None
     category_id: Optional[int] = None
     unit_id: Optional[int] = None
+
+# StorageCondition
+class StorageConditionOut(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        orm_mode = True
+
+
+class StorageConditionCreate(BaseModel):
+    name: str
+
+# StorageZone
+class StorageZoneOut(BaseModel):
+    id: int
+    name: str
+    comment: str
+    storage_condition: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+
+class StorageZoneCreate(BaseModel):
+    name: str
+    comment: str
+    storage_condition_id: int
