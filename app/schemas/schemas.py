@@ -128,9 +128,9 @@ class ProductOut(BaseModel):
     name: str
     purchase_price: Optional[float] = None
     sell_price: Optional[float] = None
-    is_active: Optional[bool] 
-    category: Optional[str] = None  
-    unit: Optional[str] = None  
+    is_active: Optional[bool] = None
+    category_id: int
+    unit_id: int
 
     class Config:
         orm_mode = True
