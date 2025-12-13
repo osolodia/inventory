@@ -16,6 +16,17 @@ class Document(Base):
     company = relationship("Company", back_populates="documents")
     document_type = relationship("DocumentType", back_populates="documents")
 
+class DocumentLine(Base):
+    __tablename__ = "documentlines"
+
+    id = Column(Integer, primary_key=True, index=True)
+    quantity = Column(Integer, nullable=False)
+    actual_quantity = Column(Integer, nullable=True)
+    product_id = Column(Integer, ForeignKey("products.id"))
+    document_id = Column(Integer, ForeignKey("documents.id"))
+    storage_zone_sender_id = Column(Integer, ForeignKey("storagezones.id"), nullable=True)
+    storage_zone_receiver_id = Column(Integer, ForeignKey("storagezones.id"), nullable = True)
+
 class DocumentType(Base):
     __tablename__ = "documenttypes"
 

@@ -63,6 +63,24 @@ class DocumentUpdate(BaseModel):
     company_id: Optional[int] = None
     document_type_id: Optional[int] = None
 
+#DocumentLine
+class DocumentLine(BaseModel):
+    id: int
+    quantity: int
+    actual_quantity: Optional[int] = None
+    product_id: int
+    document_id: int
+    storage_zone_sender_id: Optional[int] = None
+    storage_zone_receiver_id: Optional[int] = None
+
+class DocumentLineCreate(BaseModel):
+    quantity: int
+    actual_quantity: Optional[int] = None
+    product_id: int
+    document_id: int
+    storage_zone_sender_id: Optional[int] = None
+    storage_zone_receiver_id: Optional[int] = None
+
 # Category 
 class CategoryOut(BaseModel):
     id: int
@@ -141,8 +159,8 @@ class ProductCreate(BaseModel):
     purchase_price: Optional[float] = None
     sell_price: Optional[float] = None
     is_active: bool = True
-    category_id: Optional[int] = None
-    unit_id: Optional[int] = None
+    category_id: int
+    unit_id: int
 
 class ProductUpdate(BaseModel):
     article: Optional[int] = None

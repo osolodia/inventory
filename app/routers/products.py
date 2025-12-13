@@ -5,6 +5,7 @@ from typing import List, Optional
 from app.db.database import SessionLocal
 from app.models.models import Product
 from app.schemas.schemas import ProductOut, ProductCreate, ProductUpdate
+from typing import Dict, Any
 
 router = APIRouter(
     prefix="/products",
@@ -55,32 +56,14 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
         unit_id=p.unit_id if p.unit_id else None
     )
     
-"""@router.post("/", response_model=ProductOut)
-def create_product(product: ProductCreate, db: Session = Depends(get_db)):
-    db_product = Product(**product.dict())
-    db.add(db_product)
-    db.commit()
-    db.refresh(db_product)
-    
-    return ProductOut(
-        id=db_product.id,
-        article=db_product.article,
-        name=db_product.name,
-        purchase_price=float(db_product.purchase_price) if db_product.purchase_price else None,
-        sell_price=float(db_product.sell_price) if db_product.sell_price else None,
-        is_active=bool(db_product.is_active),
-        category=db_product.category.name if db_product.category else None,
-        unit=db_product.unit.name if db_product.unit else None
-    )"""
-
 @router.post("/create")
 def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     try:
         # Вызов хранимой процедуры
         sql = text("""
             CALL create_product(
-                :article, :name, :purchase, :sell,
-                :category, :unit
+                :article, :name, :purchase_price, :sell_price,
+                :category_id, :unit_id
             )
         """)
         
@@ -114,41 +97,123 @@ def create_product(product: ProductCreate, db: Session = Depends(get_db)):
         
         raise HTTPException(
             status_code=500,
-            detail=f"Ошибка создания сотрудника: {str(e)}"
+            detail=f"Ошибка создания товара: {str(e)}"
         )
     
-@router.put("/{product_id}", response_model=ProductOut)
+@router.put("/{product_id}/update")
 def update_product(product_id: int, product: ProductUpdate, db: Session = Depends(get_db)):
-    db_product = db.query(Product).filter(Product.id == product_id).first()
-    if not db_product:
-        raise HTTPException(status_code=404, detail="Product not found")
+    try:
+        sql = text("""
+            CALL update_product(
+                :p_id, :p_article, :p_name, :p_purchase, :p_sell, :p_active,
+                :p_category, :p_unit
+            )
+        """)
+        
+        params = {
+            'p_id': product_id,
+            'p_article': product.article,
+            'p_name': product.name,
+            'p_purchase': product.purchase_price,
+            'p_sell': product.sell_price,
+            'p_active': product.is_active,
+            'p_category': product.category_id,
+            'p_unit': product.unit_id
+        }
     
-    for key, value in product.dict(exclude_unset=True).items():
-        setattr(db_product, key, value)
-    
-    db.commit()
-    db.refresh(db_product)
-    
-    return ProductOut(
-        id=db_product.id,
-        article=db_product.article,
-        name=db_product.name,
-        purchase_price=float(db_product.purchase_price) if db_product.purchase_price else None,
-        sell_price=float(db_product.sell_price) if db_product.sell_price else None,
-        is_active=bool(db_product.is_active),
-        category=db_product.category.name if db_product.category else None,
-        unit=db_product.unit.name if db_product.unit else None
-    )
+        result = db.execute(sql, params)
+        db.commit()
+        
+        message_row = result.fetchone()
+        message = message_row[0] if message_row else "Товар обновлён"
+        
+        get_sql = text("""
+            SELECT 
+                id, article, name, purchase_price, sell_price,
+                is_active, category_id, unit_id
+            FROM Products 
+            WHERE id = :product_id
+        """)
+        
+        updated_product = db.execute(get_sql, {'product_id': product_id}).fetchone()
+        
+        if not updated_product:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Товар с ID {product_id} не найден после обновления"
+            )
+        
+        # 4. Возвращаем полный ответ
+        return {
+            "success": True,
+            "message": message,
+            "product": {
+                "id": updated_product.id,
+                "article": updated_product.article,
+                "name": updated_product.name,
+                "purchase_price": float(updated_product.purchase_price),
+                "sell_price": float(updated_product.sell_price),
+                "is_active": bool(updated_product.is_active),
+                "category_id": updated_product.category_id,
+                "unit_id": updated_product.unit_id
+            }
+        }
+        
+    except Exception as e:
+        db.rollback()
+        error_msg = str(e)
+        
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Полная ошибка: {error_details}")
+        
+        raise HTTPException(
+            status_code=500,
+            detail=f"Ошибка обновления товара: {str(e)}")
 
-@router.delete("/{product_id}")
-def delete_product(product_id: int, db: Session = Depends(get_db)):
-    db_product = db.query(Product).filter(Product.id == product_id).first()
-    if not db_product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    
-    db.delete(db_product)
-    db.commit()
-    return {"detail": "Product deleted"}
+@router.delete("/{product_id}/delete")
+def delete_product( product_id: int, db: Session = Depends(get_db)):
+    try:
+
+        # 1. Вызываем процедуру удаления
+        sql = text("CALL delete_product(:p_id)")
+        
+        result = db.execute(sql, {'p_id': product_id})
+        db.commit()
+        
+        # 2. Получаем сообщение из процедуры
+        message_row = result.fetchone()
+        message = message_row[0] if message_row else "Товар помечен как удалённый"
+        
+        print(f"✅ {message}")
+        
+        # 3. Возвращаем успешный ответ
+        return {
+            "success": True,
+            "message": message,
+            "product_id": product_id,
+            "deleted_at": None,  # мягкое удаление, можно добавить поле deleted_at если есть
+            "is_active": False
+        }
+        
+    except Exception as e:
+        db.rollback()
+        error_msg = str(e)
+        error_details = traceback.format_exc()
+        
+        print(f"❌ Ошибка удаления товара {product_id}: {error_details}")
+        
+        # Обработка SQL ошибок из процедуры
+        if "Товар с указанным ID не найден" in error_msg:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Товар с ID {product_id} не найден"
+            )
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Ошибка удаления товара: {error_msg}"
+            )
 
 @router.get("/{product_id}/quantity")
 def get_product_quantity(
