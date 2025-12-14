@@ -198,3 +198,24 @@ class StorageZoneCreate(BaseModel):
     name: str
     comment: str
     storage_condition_id: int
+
+class Role(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        orm_mode = True
+
+class Position(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        orm_mode = True
+
+class Subdivision(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        orm_mode = True

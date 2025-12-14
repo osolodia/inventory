@@ -126,3 +126,23 @@ class StorageZone(Base):
     storage_condition_id = Column(Integer, ForeignKey("storageconditions.id"), nullable=False)
 
     storage_condition = relationship("StorageCondition", back_populates="zones")
+
+class Role(Base):
+    __tablename__ = "roles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, nullable=False)
+
+
+class Position(Base):
+    __tablename__ = "positions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, nullable=False)
+
+
+class Subdivision(Base):
+    __tablename__ = "subdivisions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, nullable=False)
