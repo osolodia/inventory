@@ -115,7 +115,7 @@ def create_employee(employee: EmployeeCreate, db: Session = Depends(get_db)):
             detail=f"Ошибка создания сотрудника: {str(e)}"
         )
 
-@router.put("/{product_id}/update")
+@router.put("/{employee_id}/update")
 def update_employee(employee_id: int, employee: EmployeeUpdate, db: Session = Depends(get_db)):
     try:
         # Вызов хранимой процедуры

@@ -88,6 +88,7 @@ def create_inventory_document(doc: DocumentCreate, db: Session = Depends(get_db)
         logger.info(f"📅 Дата: {doc.date}")
         logger.info(f"🔢 Тип документа: {doc.document_type_id}")
         logger.info(f"🏢 company_id: {doc.company_id}")
+        logger.info(f" employee_id: {doc.employee_id}")
 
         sql = text("""
             CALL create_inventory_document(
@@ -112,7 +113,120 @@ def create_inventory_document(doc: DocumentCreate, db: Session = Depends(get_db)
             return {
                 "success": True,
                 "document": document,
-                "message": "Document created successfully"
+                "message": "Document inventory created successfully"
+            }
+        else:
+            logger.error("❌ Процедура не вернула ID документа")
+            raise HTTPException(status_code=500, detail="Failed to create document")
+            
+    except Exception as e:
+        logger.error(f"🔥 КРИТИЧЕСКАЯ ОШИБКА: {str(e)}")
+        logger.error(f"🔥 Трассировка:\n{traceback.format_exc()}")
+        
+        # Откатываем транзакцию
+        db.rollback()
+        
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": str(e),
+                "type": type(e).__name__,
+                "traceback": traceback.format_exc()
+            }
+        )
+
+@router.post("/create_rec_doc")
+def create_receipt_document(doc: DocumentCreate, db: Session = Depends(get_db)):
+    try:
+        logger.info(f"🎯 Начало создания документа. Данные: {doc.dict()}")
+        
+        # Логируем отдельные поля
+        logger.info(f"📄 Номер: {doc.number}")
+        logger.info(f"📅 Дата: {doc.date}")
+        logger.info(f"🔢 Тип документа: {doc.document_type_id}")
+        logger.info(f"🏢 company_id: {doc.company_id}")
+        logger.info(f" employee_id: {doc.employee_id}")
+
+        sql = text("""
+            CALL create_receipt_document(
+                :p_company_id, :p_employee_id)
+        """)
+        
+        result = db.execute(sql, {
+            'p_company_id': doc.company_id,
+            'p_employee_id': doc.employee_id,
+        })
+
+        db.commit()
+
+        row = result.fetchone()
+        if row:
+            document_id = row[0]
+            logger.info(f"✅ Документ создан с ID: {document_id}")
+            
+            # Получаем полные данные документа
+            document = db.query(Document).filter(Document.id == document_id).first()
+            
+            return {
+                "success": True,
+                "document": document,
+                "message": "Document receipt created successfully"
+            }
+        else:
+            logger.error("❌ Процедура не вернула ID документа")
+            raise HTTPException(status_code=500, detail="Failed to create document")
+            
+    except Exception as e:
+        logger.error(f"🔥 КРИТИЧЕСКАЯ ОШИБКА: {str(e)}")
+        logger.error(f"🔥 Трассировка:\n{traceback.format_exc()}")
+        
+        # Откатываем транзакцию
+        db.rollback()
+        
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": str(e),
+                "type": type(e).__name__,
+                "traceback": traceback.format_exc()
+            }
+        )
+    
+@router.post("/create_trn_doc")
+def create_transfer_document(doc: DocumentCreate, db: Session = Depends(get_db)):
+    try:
+        logger.info(f"🎯 Начало создания документа. Данные: {doc.dict()}")
+        
+        # Логируем отдельные поля
+        logger.info(f"📄 Номер: {doc.number}")
+        logger.info(f"📅 Дата: {doc.date}")
+        logger.info(f"🔢 Тип документа: {doc.document_type_id}")
+        logger.info(f"🏢 company_id: {doc.company_id}")
+        logger.info(f" employee_id: {doc.employee_id}")
+
+        sql = text("""
+            CALL create_transfer_document(
+                :p_employee_id)
+        """)
+        
+        result = db.execute(sql, {
+            'p_employee_id': doc.employee_id,
+        })
+
+        db.commit()
+
+        row = result.fetchone()
+        if row:
+            document_id = row[0]
+            logger.info(f"✅ Документ создан с ID: {document_id}")
+            
+            # Получаем полные данные документа
+            document = db.query(Document).filter(Document.id == document_id).first()
+            
+            return {
+                "success": True,
+                "document": document,
+                "message": "Document transfer created successfully"
             }
         else:
             logger.error("❌ Процедура не вернула ID документа")
